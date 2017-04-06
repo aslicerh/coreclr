@@ -115,7 +115,7 @@ bool EventPipe::EventEnabled(GUID& providerID, INT64 keyword)
     return false;
 }
 
-void EventPipe::WriteEvent(GUID& providerID, INT64 eventID, BYTE *pData, size_t length, bool sampleStack)
+void EventPipe::WriteEvent(EventMetadata &eventMetadata, BYTE *pData, size_t length)
 {
     CONTRACTL
     {
@@ -126,9 +126,9 @@ void EventPipe::WriteEvent(GUID& providerID, INT64 eventID, BYTE *pData, size_t 
     CONTRACTL_END;
 
     StackContents stackContents;
-    bool stackWalkSucceeded;
+    bool stackWalkSucceeded = false;
 
-    if(sampleStack)
+    if(eventMetadata.NeedStack())
     {
         stackWalkSucceeded = WalkManagedStackForCurrentThread(stackContents);
     }

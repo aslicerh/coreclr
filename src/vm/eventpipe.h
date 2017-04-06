@@ -105,6 +105,79 @@ public:
     }
 };
 
+// The metadata associated with an event.
+// This data comes from the manifest and should be considered read-only.
+class EventMetadata
+{
+private:
+    // The ID of the provider that contains the event.
+    GUID m_providerID;
+
+    // The keywords associated with the event.
+    INT64 m_keywords;
+
+    // The unique ID (within the provider) of the event.
+    int m_eventID;
+
+    // The verbosity level of the event.
+    int m_level;
+
+    // True if a call stack should be captured when writing the event.
+    bool m_needStack;
+
+public:
+    EventMetadata(
+        const GUID &providerID,
+        INT64 eventID,
+        INT64 keywords,
+        int level,
+        bool needStack)
+    {
+        LIMITED_METHOD_CONTRACT;
+
+        m_providerID = providerID;
+        m_eventID = eventID;
+        m_keywords = keywords;
+        m_level = level;
+        m_needStack = needStack;
+    }
+
+    const GUID& GetProviderID() const
+    {
+        LIMITED_METHOD_CONTRACT;
+
+        return m_providerID;
+    }
+
+    INT64 GetKeywords() const
+    {
+        LIMITED_METHOD_CONTRACT;
+
+        return m_keywords;
+    }
+
+    int GetEventID() const
+    {
+        LIMITED_METHOD_CONTRACT;
+
+        return m_eventID;
+    }
+
+    INT64 GetLevel() const
+    {
+        LIMITED_METHOD_CONTRACT;
+
+        return m_level;
+    }
+
+    bool NeedStack() const
+    {
+        LIMITED_METHOD_CONTRACT;
+
+        return m_needStack;
+    }
+};
+
 class EventPipe
 {
     public:
@@ -127,9 +200,9 @@ class EventPipe
         // Determine whether or not the specified provider/keyword combination is enabled.
         static bool EventEnabled(GUID& providerID, INT64 keyword);
 
-        // Write out an event.  The event is identified by the providerID/eventID pair.
+        // Write out an event.
         // Data is written as a serialized blob matching the ETW serialization conventions.
-        static void WriteEvent(GUID& providerID, INT64 eventID, BYTE *pData, size_t length, bool sampleStack);
+        static void WriteEvent(EventMetadata &eventMetadata, BYTE *pData, size_t length);
 
         // Write out a sample profile event with the specified stack.
         static void WriteSampleProfileEvent(Thread *pThread, StackContents &stackContents);
